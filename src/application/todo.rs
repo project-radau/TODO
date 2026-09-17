@@ -5,6 +5,14 @@ pub struct Todo {
 }
 
 impl Todo {
+    pub fn new(id: u32, title: &str) -> Self {
+        Self {
+            id,
+            title: String::from(title),
+            completed: false,
+        }
+    }
+
     pub fn print(&self) {
         println!("ID: {0}", self.id);
         println!("Title: {0}", self.title);
