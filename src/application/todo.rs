@@ -1,7 +1,7 @@
 pub struct Todo {
-    pub id: u32,
-    pub title: String,
-    pub completed: bool
+    id: u32,
+    title: String,
+    completed: bool
 }
 
 impl Todo {
@@ -11,6 +11,18 @@ impl Todo {
             title: String::from(title),
             completed: false,
         }
+    }
+
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    pub fn title(&self) -> &str {
+        return &self.title;
+    }
+
+    pub fn completed(&self) -> bool {
+        self.completed
     }
 
     pub fn print(&self) {

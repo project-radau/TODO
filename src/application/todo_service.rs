@@ -1,46 +1,75 @@
 use super::todo::Todo;
 
-pub fn initialize_todos() -> Vec<Todo> {
-
-    let mut todos = Vec::new();
-
-    todos.push(Todo::new(1, "Learn Rust"));
-    todos.push(Todo::new(2, "Learn Rust 2"));
-
-    todos
+pub struct TodoService {
+    todos: Vec<Todo>,
 }
 
-pub fn add_todo(todos: &mut Vec<Todo>, title: &str) {
-    todos.push(Todo::new(todos.len() as u32 + 1, title));
-}
-
-pub fn remove_todo(todos: &mut Vec<Todo>, id: u32) -> Result<(), String> {
-    for (index, todo) in todos.iter().enumerate() {
-        if todo.id == id {
-            todos.remove(index);
-            return Ok(());
+impl TodoService {
+    pub fn new() -> Self {
+        Self {
+            todos: Vec::new()
         }
     }
-
-    Err(String::from("todo not found"))
-}
-
-pub fn find_todo_mut(todos: &mut [Todo], id: u32) -> Result<&mut Todo, String> {
-    for todo in todos {
-        if todo.id == id {
-            return Ok(todo);
-        }
+    
+    pub fn initialize_todos(&mut self) {
+        self.todos.clear();
+        
+        self.add_todo("Learn Rust");
+        self.add_todo("Learn Tauri");
+    }
+    
+    pub fn add_todo(&mut self, title: &str) {
+        self.todos.push(Todo::new( self.todos.len() as u32 + 1, title));
     }
 
-    return Err(String::from("todo not found"));
-}
-
-pub fn find_todo(todos: &[Todo], id: u32) -> Option<&Todo> {
-    for todo in todos {
-        if todo.id == id {
-            return Some(todo);
+    pub fn remove_todo(&mut self, id: u32) -> Result<(), String> {
+        for (index, todo) in self.todos.iter().enumerate() {
+            if todo.id() == id {
+                self.todos.remove(index);
+                return Ok(());
+            }
         }
+
+        Err(String::from("todo not found"))
     }
 
-    return None;
+    pub fn complete_todo(&mut self, id: u32) -> Result<(), String> {
+        for todo in &mut self.todos {
+            if todo.id() == id {
+                todo.complete();
+                return Ok(());
+            }
+        }
+
+        Err(String::from("todo not found"))
+    }
+
+    pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, String> {
+        for todo in &mut self.todos {
+            if todo.id() == id {
+                return Ok(todo);
+            }
+        }
+
+        return Err(String::from("todo not found"));
+    }
+
+    pub fn find_todo(&mut self, id: u32) -> Option<&Todo> {
+        for todo in &mut self.todos {
+            if todo.id() == id {
+                return Some(todo);
+            }
+        }
+
+        return None;
+    }
+
+    pub fn print_todos(&mut self) {
+        for todo in &mut self.todos  {
+            println!("ID: {0}", todo.id());
+            println!("Title: {0}", todo.title());
+            println!("Complete: {0}", todo.completed());
+            println!();
+        }
+    }
 }
