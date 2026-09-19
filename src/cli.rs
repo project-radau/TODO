@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
-use crate::application::todo_service::TodoService;
+use crate::application::todo_service::{
+    TodoService
+};
 use crate::input::{read_id, read_input};
 
 fn print_menu() {
@@ -30,7 +32,7 @@ fn complete_todo(service: &mut TodoService) {
     match service.complete_todo(input) 
         { 
             Ok(()) => println!("Todo completed."), 
-            Err(error) => println!("{}", error), 
+            Err(error) => println!("{}", error),
         };
 }
 
@@ -45,7 +47,7 @@ fn remove_todo(service: &mut TodoService) {
                 println!("Todo removed.");
                 todo.print();
             }, 
-            Err(error) => println!("{}", error), 
+            Err(error) => println!("{}", error),
         };
     
     service.print_todos();
@@ -68,7 +70,7 @@ fn edit_todo(service: &mut TodoService) {
                         println!("Todo edited.");
                         service.print_todos();
                     }, 
-                    Err(error) => println!("{}", error), 
+                    Err(error) => println!("{}", error),
                 };
         }
         None => {

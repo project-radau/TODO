@@ -1,6 +1,19 @@
 #![allow(dead_code)]
 
 use super::todo::Todo;
+use std::fmt::{Display, Formatter};
+
+pub enum TodoError {
+    NotFound,
+}
+
+impl Display for TodoError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TodoError::NotFound => write!(f, "Todo not found."),
+        }
+    }
+}
 
 pub struct TodoService {
     todos: Vec<Todo>,
@@ -28,38 +41,38 @@ impl TodoService {
         self.next_id += 1;
     }
 
-    pub fn remove_todo(&mut self, id: u32) -> Result<Todo, String> {
+    pub fn remove_todo(&mut self, id: u32) -> Result<Todo, TodoError> {
         let index = self.todos
             .iter()
             .position(|todo| todo.id() == id)
-            .ok_or(String::from("todo not found"))?;
+            .ok_or(TodoError::NotFound)?;
 
         let item = self.todos.remove(index);
         Ok(item)
     }
 
-    pub fn complete_todo(&mut self, id: u32) -> Result<(), String> {
+    pub fn complete_todo(&mut self, id: u32) -> Result<(), TodoError> {
         self.todos
             .iter_mut()
             .find(|todo| todo.id() == id)
-            .ok_or(String::from("todo not found"))?
+            .ok_or(TodoError::NotFound)?
             .complete();
 
         Ok(())
     }
 
-    pub fn edit_todo(&mut self, id: u32, title: &str) -> Result<(), String> {
+    pub fn edit_todo(&mut self, id: u32, title: &str) -> Result<(), TodoError> {
         let todo = self.find_todo_mut(id)?;
         todo.set_title(title);
 
         Ok(())
     }
 
-    pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, String> {
+    pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, TodoError> {
         self.todos
             .iter_mut()
             .find(|todo| todo.id() == id)
-            .ok_or(String::from("todo not found"))
+            .ok_or(TodoError::NotFound)
     }
 
     pub fn find_todo(&self, id: u32) -> Option<&Todo> {
