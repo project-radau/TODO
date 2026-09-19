@@ -4,24 +4,28 @@ use super::todo::Todo;
 
 pub struct TodoService {
     todos: Vec<Todo>,
+    next_id: u32,
 }
 
 impl TodoService {
     pub fn new() -> Self {
         Self {
-            todos: Vec::new()
+            todos: Vec::new(),
+            next_id: 0
         }
     }
     
     pub fn initialize_todos(&mut self) {
         self.todos.clear();
+        self.next_id = 0;
         
         self.add_todo("Learn Rust");
         self.add_todo("Learn Tauri");
     }
     
     pub fn add_todo(&mut self, title: &str) {
-        self.todos.push(Todo::new( self.todos.len() as u32 + 1, title));
+        self.todos.push(Todo::new(self.next_id, title));
+        self.next_id += 1;
     }
 
     pub fn remove_todo(&mut self, id: u32) -> Result<(), String> {
@@ -66,18 +70,18 @@ impl TodoService {
         return Err(String::from("todo not found"));
     }
 
-    pub fn find_todo(&mut self, id: u32) -> Option<&Todo> {
-        for todo in &mut self.todos {
+    pub fn find_todo(&self, id: u32) -> Option<&Todo> {
+        for todo in &self.todos {
             if todo.id() == id {
-                return Some(todo);
+                return Some(&todo);
             }
         }
 
         return None;
     }
 
-    pub fn print_todos(&mut self) {
-        for todo in &mut self.todos  {
+    pub fn print_todos(&self) {
+        for todo in &self.todos  {
             println!();
             println!("ID: {0}", todo.id());
             println!("Title: {0}", todo.title());

@@ -115,6 +115,7 @@ fn handle_action(choice: &str, service: &mut TodoService) -> bool {
 
 pub fn run() {
     let mut service = TodoService::new();
+    service.initialize_todos();
 
     loop {
         print_menu();
