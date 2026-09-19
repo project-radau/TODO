@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub fn read_input() -> String {
     let mut input = String::new();
 

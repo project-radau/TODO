@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use super::todo::Todo;
 
 pub struct TodoService {
@@ -42,6 +44,16 @@ impl TodoService {
         }
 
         Err(String::from("todo not found"))
+    }
+
+    pub fn edit_todo(&mut self, id: u32, title: &str) -> Result<(), String> {
+        match self.find_todo_mut(id) {
+            Ok(todo) => {
+                todo.set_title(title);
+                return Ok(());
+            },
+            Err(error) => return Err(error)
+        };
     }
 
     pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, String> {

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod application;
 mod cli;
 mod input;

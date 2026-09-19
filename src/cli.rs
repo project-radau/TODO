@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::application::todo_service::TodoService;
 use crate::input::{read_id, read_input};
 
@@ -7,7 +9,8 @@ fn print_menu() {
     println!("2. Add todo");
     println!("3. Complete todo");
     println!("4. Remove todo");
-    println!("5. Exit");
+    println!("5. Edit todo");
+    println!("6. Exit");
     println!();
 }
 
@@ -45,6 +48,34 @@ fn remove_todo(service: &mut TodoService) {
     service.print_todos();
 }
 
+fn edit_todo(service: &mut TodoService) {
+    service.print_todos();
+    println!("Which Todo should be edited? ID:"); 
+    let input_id = read_id();
+
+    match service.find_todo(input_id) {
+        Some(_) => {
+
+            println!("Please enter the new title:");
+            let input_title = read_input();
+
+            match service.edit_todo(input_id, &input_title.trim()) 
+                { 
+                    Ok(()) => {
+                        println!("Todo edited.");
+                        service.print_todos();
+                    }, 
+                    Err(error) => println!("{}", error), 
+                };
+        }
+        None => {
+            println!("Todo not found.")
+        }
+    };
+
+    
+}
+
 fn handle_action(choice: &str, service: &mut TodoService) -> bool {
     match choice
     { 
@@ -68,7 +99,12 @@ fn handle_action(choice: &str, service: &mut TodoService) -> bool {
             remove_todo(service);
             false
         } 
-        "5" => { true } 
+        "5" => 
+        {
+            edit_todo(service);
+            false
+        }
+        "6" => { true } 
         _ => 
         { 
             println!("Unknown option."); 
@@ -81,12 +117,9 @@ pub fn run() {
     let mut service = TodoService::new();
 
     loop {
-        //actions
         print_menu();
-        //input
         let input = read_input();
 
-        //match
         let interrupt_loop = handle_action(input.as_str(), &mut service);
         if interrupt_loop == true {
             break;

@@ -25,6 +25,10 @@ impl Todo {
         self.completed
     }
 
+    pub fn set_title(&mut self, title: &str) {
+        self.title = String::from(title);
+    }
+
     pub fn print(&self) {
         println!("ID: {0}", self.id);
         println!("Title: {0}", self.title);
