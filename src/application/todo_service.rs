@@ -66,6 +66,7 @@ impl TodoService {
 
     pub fn print_todos(&mut self) {
         for todo in &mut self.todos  {
+            println!();
             println!("ID: {0}", todo.id());
             println!("Title: {0}", todo.title());
             println!("Complete: {0}", todo.completed());
