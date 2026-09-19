@@ -1,11 +1,26 @@
+use std::fmt::{Display};
+
+#[derive(Debug)]
 pub struct Todo {
-    id: u32,
+    id: i64,
     title: String,
     completed: bool
 }
 
+impl Display for Todo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "ID: {}\nTitle: {}\nComplete: {}",
+            self.id,
+            self.title,
+            self.completed
+        )
+    }
+}
+
 impl Todo {
-    pub fn new(id: u32, title: &str) -> Self {
+    pub fn new(id: i64, title: &str) -> Self {
         Self {
             id,
             title: String::from(title),
@@ -13,7 +28,15 @@ impl Todo {
         }
     }
 
-    pub fn id(&self) -> u32 {
+    pub fn from_database(id: i64, title: String, completed: bool) -> Self {
+        Self {
+            id,
+            title,
+            completed,
+        }
+    }
+
+    pub fn id(&self) -> i64 {
         self.id
     }
 
@@ -27,12 +50,6 @@ impl Todo {
 
     pub fn set_title(&mut self, title: &str) {
         self.title = String::from(title);
-    }
-
-    pub fn print(&self) {
-        println!("ID: {0}", self.id);
-        println!("Title: {0}", self.title);
-        println!("Completed: {0}", self.completed);
     }
 
     pub fn complete(&mut self) {

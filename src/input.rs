@@ -10,7 +10,7 @@ pub fn read_input() -> String {
     input.trim().to_string()
 }
 
-pub fn read_id() -> u32 {
+pub fn read_id() -> i64 {
     loop {
         let mut input = String::new();
 
@@ -18,7 +18,7 @@ pub fn read_id() -> u32 {
             .read_line(&mut input)
             .expect("Failed to read input");
 
-        match input.trim().parse::<u32>()
+        match input.trim().parse::<i64>()
         {
             Ok(id) => return id,
 

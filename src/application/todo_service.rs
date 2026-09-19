@@ -1,8 +1,11 @@
 #![allow(dead_code)]
 
 use super::todo::Todo;
+use crate::infrastructure::todo_repository::TodoRepository;
+
 use std::fmt::{Display, Formatter};
 
+#[derive(Debug)]
 pub enum TodoError {
     NotFound,
 }
@@ -16,76 +19,45 @@ impl Display for TodoError {
 }
 
 pub struct TodoService {
-    todos: Vec<Todo>,
-    next_id: u32,
+    repository: TodoRepository,
 }
 
 impl TodoService {
-    pub fn new() -> Self {
-        Self {
-            todos: Vec::new(),
-            next_id: 0
-        }
-    }
-    
-    pub fn initialize_todos(&mut self) {
-        self.todos.clear();
-        self.next_id = 0;
-        
-        self.add_todo("Learn Rust");
-        self.add_todo("Learn Tauri");
-    }
-    
-    pub fn add_todo(&mut self, title: &str) {
-        self.todos.push(Todo::new(self.next_id, title));
-        self.next_id += 1;
+    pub fn new(repository: TodoRepository) -> Self {
+        Self { repository }
     }
 
-    pub fn remove_todo(&mut self, id: u32) -> Result<Todo, TodoError> {
-        let index = self.todos
-            .iter()
-            .position(|todo| todo.id() == id)
-            .ok_or(TodoError::NotFound)?;
-
-        let item = self.todos.remove(index);
-        Ok(item)
+    pub async fn get_all(&self) -> Result<Vec<Todo>, sqlx::Error> {
+        self.repository.get_all().await
     }
 
-    pub fn complete_todo(&mut self, id: u32) -> Result<(), TodoError> {
-        self.todos
-            .iter_mut()
-            .find(|todo| todo.id() == id)
-            .ok_or(TodoError::NotFound)?
-            .complete();
+    pub async fn add_todo(&self, title: &str) -> Result<(), TodoError> {
+        let todo = Todo::new(0, title);
 
-        Ok(())
+        self.repository.insert(todo).await
     }
 
-    pub fn edit_todo(&mut self, id: u32, title: &str) -> Result<(), TodoError> {
-        let todo = self.find_todo_mut(id)?;
+    pub async fn remove_todo(&self, id: i64) -> Result<Todo, TodoError> {
+        self.repository.delete(id).await
+    }
+
+    pub async fn complete_todo(&self, id: i64) -> Result<(), TodoError> {
+        let mut todo = self.repository.get(id).await?;
+
+        todo.complete();
+
+        self.repository.update(todo).await
+    }
+
+    pub async fn edit_todo(&self, id: i64, title: &str) -> Result<(), TodoError> {
+        let mut todo = self.repository.get(id).await?;
+
         todo.set_title(title);
 
-        Ok(())
+        self.repository.update(todo).await
     }
 
-    pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, TodoError> {
-        self.todos
-            .iter_mut()
-            .find(|todo| todo.id() == id)
-            .ok_or(TodoError::NotFound)
-    }
-
-    pub fn find_todo(&self, id: u32) -> Option<&Todo> {
-        self.todos.iter().find(|todo| todo.id() == id)
-    }
-
-    pub fn print_todos(&self) {
-        for todo in &self.todos  {
-            println!();
-            println!("ID: {0}", todo.id());
-            println!("Title: {0}", todo.title());
-            println!("Complete: {0}", todo.completed());
-            println!();
-        }
+    pub async fn find_todo(&self, id: i64) -> Result<Todo, TodoError> {
+        self.repository.get(id).await
     }
 }

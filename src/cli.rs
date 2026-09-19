@@ -16,118 +16,118 @@ fn print_menu() {
     println!();
 }
 
-fn add_todo(service: &mut TodoService) {
-    println!("Please insert the title:"); 
-    let title = read_input();
-
-    service.add_todo(&title); 
-    service.print_todos();
-}
-
-fn complete_todo(service: &mut TodoService) {
-    service.print_todos();
-    println!("Which Todo should be completed? ID:"); 
-    let input = read_id(); 
-    
-    match service.complete_todo(input) 
-        { 
-            Ok(()) => println!("Todo completed."), 
-            Err(error) => println!("{}", error),
-        };
-}
-
-fn remove_todo(service: &mut TodoService) {
-    service.print_todos();
-    println!("Which Todo should be deleted? ID:"); 
-    let input = read_id(); 
-
-    match service.remove_todo(input) 
-        { 
-            Ok(todo) => {
-                println!("Todo removed.");
-                todo.print();
-            }, 
-            Err(error) => println!("{}", error),
-        };
-    
-    service.print_todos();
-}
-
-fn edit_todo(service: &mut TodoService) {
-    service.print_todos();
-    println!("Which Todo should be edited? ID:"); 
-    let input_id = read_id();
-
-    match service.find_todo(input_id) {
-        Some(_) => {
-
-            println!("Please enter the new title:");
-            let input_title = read_input();
-
-            match service.edit_todo(input_id, &input_title.trim()) 
-                { 
-                    Ok(()) => {
-                        println!("Todo edited.");
-                        service.print_todos();
-                    }, 
-                    Err(error) => println!("{}", error),
-                };
+async fn print_todos(service: &TodoService) {
+    match service.get_all().await {
+        Ok(todos) => {
+            for todo in todos {
+                println!();
+                println!("{}", todo);
+            }
         }
-        None => {
-            println!("Todo not found.")
-        }
-    };
-
-    
-}
-
-fn handle_action(choice: &str, service: &mut TodoService) -> bool {
-    match choice
-    { 
-        "1" => 
-        { 
-            service.print_todos(); 
-            false
-        } 
-        "2" => 
-        {
-            add_todo(service);
-            false
-        } 
-        "3" => 
-        { 
-            complete_todo(service);
-            false
-        } 
-        "4" => 
-        { 
-            remove_todo(service);
-            false
-        } 
-        "5" => 
-        {
-            edit_todo(service);
-            false
-        }
-        "6" => { true } 
-        _ => 
-        { 
-            println!("Unknown option."); 
-            false
-        } 
+        Err(error) => println!("{}", error),
     }
 }
 
-pub fn run() {
-    let mut service = TodoService::new();
-    service.initialize_todos();
+async fn add_todo(service: &TodoService) {
+    println!("Please insert the title:");
+    let title = read_input();
 
+    match service.add_todo(&title).await {
+        Ok(()) => {
+            println!("Todo added.");
+            print_todos(service).await;
+        }
+        Err(error) => println!("{}", error),
+    }
+}
+
+async fn complete_todo(service: &TodoService) {
+    print_todos(service).await;
+
+    println!("Which Todo should be completed? ID:");
+    let input = read_id();
+
+    match service.complete_todo(input).await {
+        Ok(()) => println!("Todo completed."),
+        Err(error) => println!("{}", error),
+    }
+}
+
+async fn remove_todo(service: &TodoService) {
+    print_todos(service).await;
+
+    println!("Which Todo should be deleted? ID:");
+    let input = read_id();
+
+    match service.remove_todo(input).await {
+        Ok(_) => println!("Todo removed."),
+        Err(error) => println!("{}", error),
+    }
+
+    print_todos(service).await;
+}
+
+async fn edit_todo(service: &TodoService) {
+    print_todos(service).await;
+
+    println!("Which Todo should be edited? ID:");
+    let input_id = read_id();
+
+    match service.find_todo(input_id).await {
+        Ok(_) => {
+            println!("Please enter the new title:");
+            let input_title = read_input();
+
+            match service.edit_todo(input_id, input_title.trim()).await {
+                Ok(()) => {
+                    println!("Todo edited.");
+                    print_todos(service).await;
+                }
+                Err(error) => println!("{}", error),
+            }
+        }
+        Err(error) => println!("{}", error),
+    }
+}
+
+async fn handle_action(choice: &str, service: &TodoService) -> bool {
+    match choice {
+        "1" => {
+            print_todos(service).await;
+            false
+        }
+        "2" => {
+            add_todo(service).await;
+            false
+        }
+        "3" => {
+            complete_todo(service).await;
+            false
+        }
+        "4" => {
+            remove_todo(service).await;
+            false
+        }
+        "5" => {
+            edit_todo(service).await;
+            false
+        }
+        "6" => true,
+        _ => {
+            println!("Unknown option.");
+            false
+        }
+    }
+}
+
+pub async fn run(service: TodoService) {
     loop {
         print_menu();
         let input = read_input();
 
-        let interrupt_loop = handle_action(input.as_str(), &mut service);
-        if interrupt_loop == true {
+        let interrupt_loop = handle_action(input.as_str(), &service).await;
+
+        if interrupt_loop {
             break;
         }
     }
