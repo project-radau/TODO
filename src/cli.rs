@@ -41,7 +41,10 @@ fn remove_todo(service: &mut TodoService) {
 
     match service.remove_todo(input) 
         { 
-            Ok(()) => println!("Todo removed."), 
+            Ok(todo) => {
+                println!("Todo removed.");
+                todo.print();
+            }, 
             Err(error) => println!("{}", error), 
         };
     

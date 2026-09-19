@@ -28,56 +28,42 @@ impl TodoService {
         self.next_id += 1;
     }
 
-    pub fn remove_todo(&mut self, id: u32) -> Result<(), String> {
-        for (index, todo) in self.todos.iter().enumerate() {
-            if todo.id() == id {
-                self.todos.remove(index);
-                return Ok(());
-            }
-        }
+    pub fn remove_todo(&mut self, id: u32) -> Result<Todo, String> {
+        let index = self.todos
+            .iter()
+            .position(|todo| todo.id() == id)
+            .ok_or(String::from("todo not found"))?;
 
-        Err(String::from("todo not found"))
+        let item = self.todos.remove(index);
+        Ok(item)
     }
 
     pub fn complete_todo(&mut self, id: u32) -> Result<(), String> {
-        for todo in &mut self.todos {
-            if todo.id() == id {
-                todo.complete();
-                return Ok(());
-            }
-        }
+        self.todos
+            .iter_mut()
+            .find(|todo| todo.id() == id)
+            .ok_or(String::from("todo not found"))?
+            .complete();
 
-        Err(String::from("todo not found"))
+        Ok(())
     }
 
     pub fn edit_todo(&mut self, id: u32, title: &str) -> Result<(), String> {
-        match self.find_todo_mut(id) {
-            Ok(todo) => {
-                todo.set_title(title);
-                return Ok(());
-            },
-            Err(error) => return Err(error)
-        };
+        let todo = self.find_todo_mut(id)?;
+        todo.set_title(title);
+
+        Ok(())
     }
 
     pub fn find_todo_mut(&mut self, id: u32) -> Result<&mut Todo, String> {
-        for todo in &mut self.todos {
-            if todo.id() == id {
-                return Ok(todo);
-            }
-        }
-
-        return Err(String::from("todo not found"));
+        self.todos
+            .iter_mut()
+            .find(|todo| todo.id() == id)
+            .ok_or(String::from("todo not found"))
     }
 
     pub fn find_todo(&self, id: u32) -> Option<&Todo> {
-        for todo in &self.todos {
-            if todo.id() == id {
-                return Some(&todo);
-            }
-        }
-
-        return None;
+        self.todos.iter().find(|todo| todo.id() == id)
     }
 
     pub fn print_todos(&self) {
