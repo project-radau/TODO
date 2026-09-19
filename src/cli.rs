@@ -33,7 +33,7 @@ async fn add_todo(service: &TodoService) {
     let title = read_input();
 
     match service.add_todo(&title).await {
-        Ok(()) => {
+        Ok(_) => {
             println!("Todo added.");
             print_todos(service).await;
         }

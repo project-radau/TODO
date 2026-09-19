@@ -8,12 +8,14 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug)]
 pub enum TodoError {
     NotFound,
+    Database(sqlx::Error)
 }
 
 impl Display for TodoError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             TodoError::NotFound => write!(f, "Todo not found."),
+            TodoError::Database(error) => write!(f, "Database error: {}", error)
         }
     }
 }
@@ -31,7 +33,7 @@ impl TodoService {
         self.repository.get_all().await
     }
 
-    pub async fn add_todo(&self, title: &str) -> Result<(), TodoError> {
+    pub async fn add_todo(&self, title: &str) -> Result<i64, TodoError> {
         let todo = Todo::new(0, title);
 
         self.repository.insert(todo).await

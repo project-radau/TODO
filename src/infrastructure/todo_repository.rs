@@ -59,7 +59,7 @@ impl TodoRepository {
             id
         ).fetch_optional(&self.database)
         .await
-        .map_err(|_| TodoError::NotFound)?
+        .map_err(TodoError::Database)?
         .ok_or(TodoError::NotFound)?;
 
         Ok(Todo::from_database(row.id, row.title, row.completed != 0))
@@ -77,7 +77,7 @@ impl TodoRepository {
         )
         .execute(&self.database)
         .await
-        .map_err(|_| TodoError::NotFound)?;
+        .map_err(TodoError::Database)?;
 
         if result.rows_affected() == 0 {
             return Err(TodoError::NotFound);
@@ -98,7 +98,7 @@ impl TodoRepository {
             todo.id()
         ).execute(&self.database)
         .await
-        .map_err(|_| TodoError::NotFound)?;
+        .map_err(TodoError::Database)?;
 
         if result.rows_affected() == 0 {
             return Err(TodoError::NotFound);
@@ -107,8 +107,8 @@ impl TodoRepository {
         Ok(())
     }
 
-    pub async fn insert(&self, todo: Todo) -> Result<(), TodoError> {
-        sqlx::query!(
+    pub async fn insert(&self, todo: Todo) -> Result<i64, TodoError> {
+        let result = sqlx::query!(
             r#"
                 INSERT INTO todos (title, completed)
                 VALUES (?, ?)
@@ -117,8 +117,8 @@ impl TodoRepository {
             todo.completed()
         ).execute(&self.database)
         .await
-        .map_err(|_| TodoError::NotFound)?;
+        .map_err(TodoError::Database)?;
 
-        Ok(())
+        Ok(result.last_insert_rowid())
     }
 }
