@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use super::todo::Todo;
-use crate::infrastructure::todo_repository::TodoRepository;
+use crate::infrastructure::todo_repository::TodoRepositoryTrait;
 
 use std::fmt::{Display, Formatter};
 
@@ -20,16 +20,16 @@ impl Display for TodoError {
     }
 }
 
-pub struct TodoService {
-    repository: TodoRepository,
+pub struct TodoService<R> where R: TodoRepositoryTrait {
+    repository: R,
 }
 
-impl TodoService {
-    pub fn new(repository: TodoRepository) -> Self {
+impl<R> TodoService<R> where R: TodoRepositoryTrait {
+    pub fn new(repository: R) -> Self {
         Self { repository }
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Todo>, sqlx::Error> {
+    pub async fn get_all(&self) -> Result<Vec<Todo>, TodoError> {
         self.repository.get_all().await
     }
 

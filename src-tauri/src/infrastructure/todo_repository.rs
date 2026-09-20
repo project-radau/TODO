@@ -25,12 +25,9 @@ struct TodoRow {
     completed: i64,
 }
 
-impl TodoRepository {
-    pub fn new(database: SqlitePool) -> Self {
-        Self { database }
-    }
-
-    pub async fn get_all(&self) -> Result<Vec<Todo>, sqlx::Error> {
+#[async_trait::async_trait]
+impl TodoRepositoryTrait for TodoRepository {
+    async fn get_all(&self) -> Result<Vec<Todo>, TodoError> {
         let rows = sqlx::query_as!(
             TodoRow,
             r#"
@@ -40,7 +37,8 @@ impl TodoRepository {
             "#
         )
         .fetch_all(&self.database)
-        .await?;
+        .await
+        .map_err(TodoError::Database)?;
 
         let todos = rows
             .into_iter()
@@ -56,7 +54,7 @@ impl TodoRepository {
         Ok(todos)
     }
 
-    pub async fn get(&self, id: i64) -> Result<Todo, TodoError> {
+    async fn get(&self, id: i64) -> Result<Todo, TodoError> {
         let row = sqlx::query_as!(
             TodoRow,
             r#"
@@ -74,7 +72,7 @@ impl TodoRepository {
         Ok(Todo::from_database(row.id, row.title, row.completed != 0))
     }
 
-    pub async fn delete(&self, id: i64) -> Result<Todo, TodoError> {
+    async fn delete(&self, id: i64) -> Result<Todo, TodoError> {
         let todo = self.get(id).await?;
 
         let result = sqlx::query!(
@@ -95,7 +93,7 @@ impl TodoRepository {
         Ok(todo)
     }
 
-    pub async fn update(&self, todo: Todo) -> Result<(), TodoError> {
+    async fn update(&self, todo: Todo) -> Result<(), TodoError> {
         let result = sqlx::query!(
             r#"
                 UPDATE todos
@@ -116,7 +114,7 @@ impl TodoRepository {
         Ok(())
     }
 
-    pub async fn insert(&self, todo: Todo) -> Result<i64, TodoError> {
+    async fn insert(&self, todo: Todo) -> Result<i64, TodoError> {
         let result = sqlx::query!(
             r#"
                 INSERT INTO todos (title, completed)
@@ -129,5 +127,11 @@ impl TodoRepository {
         .map_err(TodoError::Database)?;
 
         Ok(result.last_insert_rowid())
+    }
+}
+
+impl TodoRepository {
+    pub fn new(database: SqlitePool) -> Self {
+        Self { database }
     }
 }

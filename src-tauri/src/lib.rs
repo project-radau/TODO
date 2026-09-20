@@ -4,9 +4,10 @@ mod infrastructure;
 mod input;
 
 use crate::application::todo_service::TodoService;
+use crate::infrastructure::todo_repository::TodoRepository;
 
 #[tauri::command]
-async fn get_todos(service: tauri::State<'_, TodoService>,) -> Result<Vec<application::todo::Todo>, String> {
+async fn get_todos(service: tauri::State<'_, TodoService<TodoRepository>>,) -> Result<Vec<application::todo::Todo>, String> {
     service
         .get_all()
         .await
@@ -14,7 +15,7 @@ async fn get_todos(service: tauri::State<'_, TodoService>,) -> Result<Vec<applic
 }
 
 #[tauri::command]
-async fn add_todo(title: String, service: tauri::State<'_, TodoService>) -> Result<i64, String> {
+async fn add_todo(title: String, service: tauri::State<'_, TodoService<TodoRepository>>) -> Result<i64, String> {
     service
         .add_todo(&title)
         .await
@@ -22,7 +23,7 @@ async fn add_todo(title: String, service: tauri::State<'_, TodoService>) -> Resu
 }
 
 #[tauri::command]
-async fn complete_todo(id: i64, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+async fn complete_todo(id: i64, service: tauri::State<'_, TodoService<TodoRepository>>) -> Result<(), String> {
     service
         .complete_todo(id)
         .await
@@ -30,7 +31,7 @@ async fn complete_todo(id: i64, service: tauri::State<'_, TodoService>) -> Resul
 }
 
 #[tauri::command]
-async fn edit_todo(id: i64, title: String, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+async fn edit_todo(id: i64, title: String, service: tauri::State<'_, TodoService<TodoRepository>>) -> Result<(), String> {
     service
         .edit_todo(id, &title)
         .await
@@ -38,7 +39,7 @@ async fn edit_todo(id: i64, title: String, service: tauri::State<'_, TodoService
 }
 
 #[tauri::command]
-async fn delete_todo(id: i64, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+async fn delete_todo(id: i64, service: tauri::State<'_, TodoService<TodoRepository>>) -> Result<(), String> {
     service
         .remove_todo(id)
         .await
@@ -75,9 +76,4 @@ pub fn run() {
     })
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
-}
-
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}!", name)
 }
