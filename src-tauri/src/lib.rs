@@ -21,6 +21,31 @@ async fn add_todo(title: String, service: tauri::State<'_, TodoService>) -> Resu
         .map_err(|error| error.to_string())
 }
 
+#[tauri::command]
+async fn complete_todo(id: i64, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+    service
+        .complete_todo(id)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+async fn edit_todo(id: i64, title: String, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+    service
+        .edit_todo(id, &title)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+async fn delete_todo(id: i64, service: tauri::State<'_, TodoService>) -> Result<(), String> {
+    service
+        .remove_todo(id)
+        .await
+        .map(|_| ())
+        .map_err(|error| error.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   let database = tauri::async_runtime::block_on(database::setup_database());
@@ -33,7 +58,10 @@ pub fn run() {
     .manage(service)
     .invoke_handler(tauri::generate_handler![
         get_todos,
-        add_todo
+        add_todo,
+        complete_todo,
+        edit_todo,
+        delete_todo
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {
