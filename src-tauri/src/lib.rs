@@ -1,0 +1,55 @@
+mod application;
+mod database;
+mod infrastructure;
+mod input;
+
+use crate::application::todo_service::TodoService;
+
+#[tauri::command]
+async fn get_todos(service: tauri::State<'_, TodoService>,) -> Result<Vec<application::todo::Todo>, String> {
+    service
+        .get_all()
+        .await
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+async fn add_todo(title: String, service: tauri::State<'_, TodoService>) -> Result<i64, String> {
+    service
+        .add_todo(&title)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+  let database = tauri::async_runtime::block_on(database::setup_database());
+
+  let repository = infrastructure::todo_repository::TodoRepository::new(database);
+
+  let service = TodoService::new(repository);
+
+  tauri::Builder::default()
+    .manage(service)
+    .invoke_handler(tauri::generate_handler![
+        get_todos,
+        add_todo
+    ])
+    .setup(|app| {
+      if cfg!(debug_assertions) {
+        app.handle().plugin(
+          tauri_plugin_log::Builder::default()
+            .level(log::LevelFilter::Info)
+            .build(),
+        )?;
+      }
+      Ok(())
+    })
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}!", name)
+}
