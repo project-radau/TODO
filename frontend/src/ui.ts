@@ -2,44 +2,110 @@ import type { Todo } from "./api";
 
 export function renderTodos(todos: Todo[]) {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-    <h1>Todos</h1>
+    <div class="app-shell">
+      <main class="todo-app">
 
-    <form id="add-form">
-      <input id="title" type="text" placeholder="New todo..." />
-      <button type="submit">Add</button>
-    </form>
+        <header class="app-header">
+          <div>
+            <span class="eyebrow">TASKS</span>
+            <h1>My Todos</h1>
+          </div>
 
-    <ul>
-      ${todos
-        .map(
-          todo => `
-            <li>
-              ${todo.id}: ${todo.title}
-              ${todo.completed ? "✓" : ""}
+          <div class="todo-count">
+            ${todos.length}
+          </div>
+        </header>
 
-              ${
-                !todo.completed
-                  ? `<button class="complete-button" data-id="${todo.id}">
-                       Complete
-                     </button>`
-                  : ""
-              }
+        <form id="add-form" class="add-form">
+          <div class="input-wrapper">
+            <input
+              id="title"
+              type="text"
+              placeholder="What needs to be done?"
+              autocomplete="off"
+            />
+          </div>
 
-              <button
-                class="edit-button"
-                data-id="${todo.id}"
-                data-title="${todo.title}"
-              >
-                Edit
-              </button>
+          <button class="add-button" type="submit">
+            <span>+</span>
+            <span>Add</span>
+          </button>
+        </form>
 
-              <button class="delete-button" data-id="${todo.id}">
-                Delete
-              </button>
-            </li>
-          `
-        )
-        .join("")}
-    </ul>
+        <section class="todo-list">
+
+          ${
+            todos.length === 0
+              ? `
+                <div class="empty-state">
+                  <div class="empty-icon">✓</div>
+                  <h2>All clear</h2>
+                  <p>You don't have any tasks yet.</p>
+                </div>
+              `
+              : todos
+                  .map(
+                    todo => `
+                      <article
+                        class="todo-item ${todo.completed ? "completed" : ""}"
+                      >
+                        <div class="todo-main">
+
+                          <button
+                            class="complete-button todo-checkbox"
+                            data-id="${todo.id}"
+                            aria-label="${
+                              todo.completed
+                                ? "Mark as incomplete"
+                                : "Complete todo"
+                            }"
+                          >
+                            ${todo.completed ? "✓" : ""}
+                          </button>
+
+                          <div class="todo-content">
+                            <span class="todo-title">
+                              ${todo.title}
+                            </span>
+
+                            ${
+                              todo.completed
+                                ? `<span class="todo-status">Completed</span>`
+                                : ""
+                            }
+                          </div>
+
+                        </div>
+
+                        <div class="todo-actions">
+
+                          <button
+                            class="edit-button icon-button"
+                            data-id="${todo.id}"
+                            data-title="${todo.title}"
+                            aria-label="Edit todo"
+                          >
+                            ✎
+                          </button>
+
+                          <button
+                            class="delete-button icon-button"
+                            data-id="${todo.id}"
+                            aria-label="Delete todo"
+                          >
+                            ×
+                          </button>
+
+                        </div>
+                      </article>
+                    `
+                  )
+                  .join("")
+          }
+
+        </section>
+
+      </main>
+    </div>
   `;
 }
