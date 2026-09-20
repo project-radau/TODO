@@ -5,9 +5,7 @@ import {
 import { renderTodos } from "./ui";
 import { 
   setupAddTodo,
-  setupCompleteTodos,
-  setupEditTodos,
-  setupDeleteTodos
+  setupTodoEvents
 } from "./events";
 
 async function loadTodos() {
@@ -19,6 +17,4 @@ async function loadTodos() {
 await loadTodos();
 
 setupAddTodo(loadTodos);
-setupCompleteTodos(loadTodos);
-setupEditTodos(loadTodos);
-setupDeleteTodos(loadTodos);
+setupTodoEvents(loadTodos);
