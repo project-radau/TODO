@@ -6,6 +6,15 @@ use sqlx::{SqlitePool};
 
 use crate::application::todo::Todo;
 
+#[async_trait::async_trait]
+pub trait TodoRepositoryTrait {
+    async fn get_all(&self) -> Result<Vec<Todo>, TodoError>;
+    async fn get(&self, id: i64) -> Result<Todo, TodoError>;
+    async fn delete(&self, id: i64) -> Result<Todo, TodoError>;
+    async fn update(&self, todo: Todo) -> Result<(), TodoError>;
+    async fn insert(&self, todo: Todo) -> Result<i64, TodoError>;
+}
+
 pub struct TodoRepository {
     database: SqlitePool,
 }
