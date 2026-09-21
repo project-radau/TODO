@@ -19,7 +19,9 @@
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   background:
     radial-gradient(
       circle at top,
@@ -38,8 +40,9 @@ button {
 }
 
 .app-shell {
-  min-height: 100vh;
-  padding: 48px 20px;
+  min-height: 100dvh;
+  padding: max(48px, env(safe-area-inset-top)) 20px
+           max(48px, env(safe-area-inset-bottom));
 }
 
 .todo-app {
@@ -331,7 +334,8 @@ button {
 
 @media (max-width: 520px) {
   .app-shell {
-    padding: 24px 14px;
+    padding: max(24px, env(safe-area-inset-top)) 14px
+             max(24px, env(safe-area-inset-bottom));
   }
 
   .app-header {
