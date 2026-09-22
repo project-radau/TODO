@@ -1,4 +1,5 @@
 import type { Todo } from "./api";
+import { createIcons, Plus, Check, Pencil, X } from "lucide";
 
 export function renderTodos(todos: Todo[]) {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
@@ -27,7 +28,7 @@ export function renderTodos(todos: Todo[]) {
           </div>
 
           <button class="add-button" type="submit">
-            <span>+</span>
+            <i data-lucide="plus"></i>
             <span>Add</span>
           </button>
         </form>
@@ -38,7 +39,9 @@ export function renderTodos(todos: Todo[]) {
             todos.length === 0
               ? `
                 <div class="empty-state">
-                  <div class="empty-icon">✓</div>
+                  <div class="empty-icon">
+                    <i data-lucide="check"></i>
+                  </div>
                   <h2>All clear</h2>
                   <p>You don't have any tasks yet.</p>
                 </div>
@@ -60,7 +63,7 @@ export function renderTodos(todos: Todo[]) {
                                 : "Complete todo"
                             }"
                           >
-                            ${todo.completed ? "✓" : ""}
+                            ${todo.completed ? `<i data-lucide="check"></i>` : ""}
                           </button>
 
                           <div class="todo-content">
@@ -85,7 +88,7 @@ export function renderTodos(todos: Todo[]) {
                             data-title="${todo.title}"
                             aria-label="Edit todo"
                           >
-                            ✎
+                            <i data-lucide="pencil"></i>
                           </button>
 
                           <button
@@ -93,7 +96,7 @@ export function renderTodos(todos: Todo[]) {
                             data-id="${todo.id}"
                             aria-label="Delete todo"
                           >
-                            ×
+                            <i data-lucide="x"></i>
                           </button>
 
                         </div>
@@ -108,4 +111,13 @@ export function renderTodos(todos: Todo[]) {
       </main>
     </div>
   `;
+
+  createIcons({
+    icons: {
+      Plus,
+      Check,
+      Pencil,
+      X,
+    },
+  });
 }
